@@ -8,7 +8,7 @@ def get_score(speedValAsList, timeArray, old_score):
       # it will start from zero to 1, this means as time increase
       timeSeries = timeArray[z]/(1+timeArray[z])
       # print(z)
-      x = accelAsList[z]
+      x = accelAsList[z]/(timeArray[z]-timeArray[z-1])
       if (7 <= abs(x)):
          if (x > 0):
             accelScore += 3*timeSeries
@@ -43,6 +43,6 @@ def get_score(speedValAsList, timeArray, old_score):
    weightedScore = 0 if c < 0 else c
 
    # {"score" : score}
-   return {"score": score, "weightedScore": weightedScore, "breakScore": breakScore, "accelScore": accelScore}
+   return {"score": score, "weightedScore": weightedScore, "breakScore": breakScore, "accelScore": accelScore, 'Max Speed': max(speedValAsList)}
    # print(" Your score is %d out of 100,\n Your total score is %d out 100 \n With max speed : %.2f km/h and max accleartion: %.2f km/h^2" %
    #       (score, weightedScore, max(speedValAsList), max(accelAsList)))

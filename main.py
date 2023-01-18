@@ -8,7 +8,7 @@ import time
 from file import put_data
 import json
 
-ID = "6003277"
+ID = "6065651"
 
 token = HTTPBasicAuth("s202159910@kfupm.edu.sa", "OmAr11223")
 
@@ -19,12 +19,25 @@ def post(d):
     if res.status_code == 201:
         print("SENT : ", d["type"])
     else:
+        print(res.text)
+        print("FAILED ", res.status_code)
+
+
+def postMultiple(m):
+    # application/vnd.com.nsn.cumulocity.measurementCollection+json
+    res = requests.post(
+        "https://env573108.us.cumulocity.com/measurement/measurements", json={"measurements": [*m]}, auth=token, headers={"accept": "application/vnd.com.nsn.cumulocity.measurementCollection+json"})
+    if res.status_code == 201:
+        print("SENT : ", [i["type"] for i in m])
+    else:
+        print(res.text)
         print("FAILED ", res.status_code)
 
 
 def postAll(obj):
+    me = []
     for i in obj:
-        post({
+        me.append({
             f"c8y_{i}": {
                 "S": {
                     "value": obj[i],
@@ -36,18 +49,19 @@ def postAll(obj):
                 "id": ID},
             "type": i
         })
+    postMultiple(me)
 
 
 old_score = 0
 
-with open('data.json', 'r') as f:
+with open('/Users/3mr/Documents/obd/data.json', 'r') as f:
     data = json.load(f)
     if len(data["speed"]) > 0:
         old_score = data["score"]  # get_old_score()
         score = get_score(data["speed"], data["time"], old_score)
         postAll(score)
         f.close()
-        with open('data.json', 'w') as f:
+        with open('/Users/3mr/Documents/obd/data.json', 'w') as f:
             f.write('{"speed":[],"time":[],"score":'+str(score["score"])+"}")
     else:
         print("not data")
@@ -64,8 +78,8 @@ time_start = time.time()
 counter = 0
 while connect.is_connected():
     old_speed = 0
-    for i in ["SPEED", "RPM", "RUN_TIME", "DISTANCE_W_MIL", "FUEL_PRESSURE", "FUEL_RATE"]:
-
+    measurements = []
+    for i in ["SPEED", "RPM", "RUN_TIME", "DISTANCE_W_MIL"]:
         cmd = obd.commands[i]
         res = connect.query(cmd)
         fragment = (str(cmd).split(":")[1].strip())
@@ -79,7 +93,7 @@ while connect.is_connected():
             old_speed = value
             put_data(value, time.time() - time_start)
 
-        post({
+        measurements.append({
             f"c8y_{fragment}": {
                 "S": {
                     "value": value,
@@ -92,13 +106,12 @@ while connect.is_connected():
             },
             "type": fragment
         })
+    postMultiple(measurements)
 
 # with open("xxxuy.txt", 'w') as file:
 #     # get the old score in cumulocity
 #     file.write(get_score(speedList, timeList, 0))
 #     file.write('\n')
-
-
 
 
 # file = open('dh7.csv', 'w')

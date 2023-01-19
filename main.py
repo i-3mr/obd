@@ -91,7 +91,7 @@ while connect.is_connected():
 
         if i == "SPEED":
             old_speed = value
-            put_data(value, time.time() - time_start)
+            put_data(value, time.time())
 
         measurements.append({
             f"c8y_{fragment}": {

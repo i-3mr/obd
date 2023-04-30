@@ -10,7 +10,7 @@ import json
 
 ID = "6065651"
 
-token = HTTPBasicAuth("s202159910@kfupm.edu.sa", "OmAr11223")
+token = HTTPBasicAuth("EMAIL", "PASSWORD")
 
 
 def post(d):
